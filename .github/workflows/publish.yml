@@ -8,6 +8,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
 
     steps:
       - name: Checkout code
@@ -47,6 +50,30 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
+          body: |
+            ## 🚀 What's New in ${{ github.ref_name }}
+            
+            ### ✨ New Features
+            - Interactive folder browser starting from root directory
+            - Command line arguments support (--help, --version, input-path)
+            - Graceful exit handling with file cleanup options
+            
+            ### 🐛 Bug Fixes
+            - Fixed video conversion codec and format mismatch issues
+            - Fixed prompt navigation when going back to previous steps
+            - Improved Jest configuration for CI/CD pipeline
+            
+            ### 🔧 Improvements
+            - Enhanced CLI user experience with better navigation
+            - Improved error handling and user feedback
+            - Added comprehensive documentation updates
+            
+            ## 📦 Installation
+            ```bash
+            npm install -g media-to-web
+            # or
+            npx media-to-web
+            ```
           draft: false
           prerelease: false
         env:
