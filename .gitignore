@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Test files
+test/
+tests/output/
+*.test.js
+*.test.ts
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Converted files (for testing)
+converted/
+output/
+
+# Test coverage
+coverage/
