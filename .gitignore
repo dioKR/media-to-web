@@ -5,12 +5,6 @@ node_modules/
 dist/
 build/
 
-# Test files
-test/
-tests/output/
-*.test.js
-*.test.ts
-
 # Logs
 logs/
 *.log

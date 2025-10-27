@@ -2,20 +2,15 @@
 
 import chalk from "chalk";
 import ora from "ora";
-import { existsSync, readdirSync, unlinkSync } from "fs";
+import { existsSync, unlinkSync } from "fs";
 import { resolve, join, basename, extname } from "path";
-import inquirer from "inquirer";
+import { PromptManager } from "../src/prompts/PromptManager.js";
+import { ConverterFactory } from "../src/converters/ConverterFactory.js";
+import { detectGPU, getVideoEncoder } from "../src/utils/gpuUtils.js";
 import {
-  promptUser,
   getQualitySettings,
   getConcurrencyLevel,
-} from "../src/prompts.js";
-import { convertImages } from "../src/imageConverter.js";
-import {
-  convertVideos,
-  detectGPU,
-  getVideoEncoder,
-} from "../src/videoConverter.js";
+} from "../src/prompts/ConfigurationBuilder.js";
 import type { ImageConfig, VideoConfig } from "../src/config/types.js";
 
 // 명령행 인자 파싱
@@ -99,139 +94,7 @@ function validateInputPath(inputPath: string): boolean {
   return true;
 }
 
-// 폴더 탐색 기능
-async function browseFolders(currentPath: string = "/"): Promise<string> {
-  while (true) {
-    try {
-      // 현재 디렉토리의 폴더들 가져오기 (숨김 파일 제외)
-      const items = readdirSync(currentPath, { withFileTypes: true });
-      const folders = items
-        .filter(
-          (dirent) => dirent.isDirectory() && !dirent.name.startsWith(".")
-        )
-        .map((dirent) => ({
-          name: `📁 ${dirent.name}`,
-          value: resolve(currentPath, dirent.name),
-        }));
-
-      const choices = [
-        { name: "✅ Select this folder", value: "select" },
-        ...(currentPath !== "/"
-          ? [{ name: "📂 Parent directory", value: "parent" }]
-          : []),
-        ...folders,
-        { name: "📝 Enter path manually", value: "manual" },
-        { name: "🔙 Back to main menu", value: "back" },
-      ];
-
-      console.log(chalk.blue(`\n📁 Current directory: ${currentPath}`));
-      console.log(chalk.gray(`Found ${folders.length} folders`));
-
-      const { action } = await inquirer.prompt([
-        {
-          type: "list",
-          name: "action",
-          message: "Select an option:",
-          choices: choices,
-        },
-      ]);
-
-      if (action === "select") {
-        return currentPath;
-      } else if (action === "parent") {
-        const parentPath = resolve(currentPath, "..");
-        if (parentPath !== currentPath) {
-          currentPath = parentPath;
-        } else {
-          console.log(chalk.yellow("Already at root directory"));
-        }
-      } else if (action === "manual") {
-        const { manualPath } = await inquirer.prompt([
-          {
-            type: "input",
-            name: "manualPath",
-            message: "Enter the folder path:",
-            validate: (input: string) => {
-              if (!input.trim()) {
-                return "Please enter a valid path";
-              }
-              if (!existsSync(input.trim())) {
-                return "Path does not exist. Please check and try again.";
-              }
-              return true;
-            },
-          },
-        ]);
-        return resolve(manualPath.trim());
-      } else if (action === "back") {
-        return "back";
-      } else {
-        // 폴더 선택
-        currentPath = action;
-      }
-    } catch (error) {
-      console.error(chalk.red("Error reading directory:", error));
-      console.log(chalk.yellow("Trying to access parent directory..."));
-
-      // 권한 문제로 접근할 수 없는 경우 상위 디렉토리로 이동
-      const parentPath = resolve(currentPath, "..");
-      if (parentPath !== currentPath) {
-        currentPath = parentPath;
-      } else {
-        console.log(
-          chalk.red("Cannot access this directory. Going back to main menu.")
-        );
-        return "back";
-      }
-    }
-  }
-}
-
-// 폴더 선택 기능
-async function selectInputFolder(): Promise<string> {
-  const choices = [
-    { name: "📁 Browse folders", value: "browse" },
-    { name: "📝 Enter path manually", value: "manual" },
-    { name: "📂 Use current directory", value: process.cwd() },
-  ];
-
-  const { folderOption } = await inquirer.prompt([
-    {
-      type: "list",
-      name: "folderOption",
-      message: "How would you like to select the input folder?",
-      choices: choices,
-    },
-  ]);
-
-  if (folderOption === "browse") {
-    const selectedPath = await browseFolders();
-    if (selectedPath === "back") {
-      return await selectInputFolder(); // 다시 메인 메뉴로
-    }
-    return selectedPath;
-  } else if (folderOption === "manual") {
-    const { manualPath } = await inquirer.prompt([
-      {
-        type: "input",
-        name: "manualPath",
-        message: "Enter the folder path:",
-        validate: (input: string) => {
-          if (!input.trim()) {
-            return "Please enter a valid path";
-          }
-          if (!existsSync(input.trim())) {
-            return "Path does not exist. Please check and try again.";
-          }
-          return true;
-        },
-      },
-    ]);
-    return resolve(manualPath.trim());
-  } else {
-    return folderOption;
-  }
-}
+// 폴더 탐색 및 선택 기능은 이제 FolderBrowserPrompt 클래스로 이동됨
 
 console.log(chalk.bold.cyan("\n🎨 Media to Web CLI\n"));
 
@@ -299,8 +162,6 @@ async function main(): Promise<void> {
       return;
     }
 
-    let config;
-
     let inputFolder: string;
 
     // 명령행 인자로 입력 경로가 제공된 경우
@@ -317,19 +178,23 @@ async function main(): Promise<void> {
       );
     } else {
       // 폴더 선택
-      inputFolder = await selectInputFolder();
+      const folderBrowser = new (
+        await import("../src/prompts/FolderBrowserPrompt.js")
+      ).FolderBrowserPrompt();
+      inputFolder = await folderBrowser.selectInputFolder();
       console.log(chalk.gray(`Selected input folder: ${inputFolder}\n`));
     }
 
-    // 대단형 모드 (입력 폴더 미리 설정)
-    config = await promptUser(inputFolder);
+    // 새로운 PromptManager 사용
+    const promptManager = new PromptManager();
+    const config = await promptManager.promptUser(inputFolder);
 
     // 출력 폴더 저장 (정리용)
     outputFolder = config.outputFolder;
 
     const qualitySettings = getQualitySettings(
       config.quality,
-      config.convertType,
+      config.convertType as "image" | "video",
       config.advancedConfig
     );
 
@@ -350,8 +215,8 @@ async function main(): Promise<void> {
 
     // CPU 사용률 설정 표시
     const actualConcurrency = getConcurrencyLevel(
-      config.concurrency,
-      config.convertType
+      config.concurrency as number | "maximum" | "balanced" | "light",
+      config.convertType as "image" | "video"
     );
     console.log(
       chalk.gray(
@@ -457,28 +322,18 @@ async function main(): Promise<void> {
       }
     };
 
-    let results;
-
-    if (config.convertType === "image") {
-      results = await convertImages(
-        config.inputFolder,
-        config.outputFolder,
-        qualitySettings as ImageConfig,
-        config.selectedFiles,
-        progressCallback,
-        actualConcurrency
-      );
-    } else {
-      results = await convertVideos(
-        config.inputFolder,
-        config.outputFolder,
-        qualitySettings as VideoConfig,
-        config.selectedFiles,
-        progressCallback,
-        videoEncoder ? videoEncoder.options : null,
-        actualConcurrency
-      );
-    }
+    // 새로운 ConverterFactory 사용
+    const converter = ConverterFactory.createConverter(
+      config.convertType as "image" | "video"
+    );
+    const results = await converter.convert(
+      config.inputFolder,
+      config.outputFolder,
+      qualitySettings,
+      config.selectedFiles,
+      progressCallback,
+      actualConcurrency
+    );
 
     // 변환 완료 시간 기록 및 소요시간 계산
     const endTime = Date.now();
