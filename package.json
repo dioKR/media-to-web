@@ -4,17 +4,26 @@
   "description": "🎨 CLI tool to convert images and videos to web-optimized formats (WebP, WebM) - Under Development",
   "main": "dist/bin/index.js",
   "bin": {
-    "mtw": "./dist/bin/index.js"
+    "mtw": "./dist/bin/index.js",
+    "media-to-web": "./dist/bin/index.js"
   },
+  "files": [
+    "dist/",
+    "README.md",
+    "README.ko.md",
+    "LICENSE"
+  ],
   "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "start": "node bin/index.js",
+    "start": "node dist/bin/index.js",
     "prepublishOnly": "npm run build",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "changelog:all": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
   "keywords": [
     "cli",
@@ -27,7 +36,7 @@
     "optimization",
     "development"
   ],
-  "author": "",
+  "author": "dioKR",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -54,8 +63,48 @@
     "@types/inquirer": "^9.0.9",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.9.1",
+    "conventional-changelog-cli": "^5.0.0",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.5",
     "typescript": "^5.9.3"
+  },
+  "jest": {
+    "preset": "ts-jest/presets/default-esm",
+    "testEnvironment": "node",
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "transform": {
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "useESM": true
+        }
+      ]
+    },
+    "testMatch": [
+      "**/tests/**/*.test.ts"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.ts"
+    ],
+    "testTimeout": 30000,
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
+    "verbose": true,
+    "forceExit": true
   }
 }
