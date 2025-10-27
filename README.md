@@ -32,6 +32,8 @@ Contributions and feedback are welcome!
 
 - 🖼️ **Image Conversion**: JPG/PNG → WebP/AVIF
 - 🎬 **Video Conversion**: MP4/MOV → WebM with GPU acceleration
+- 📁 **Interactive folder browser** starting from root directory
+- 🎯 **Command line arguments** (--help, --version, input-path)
 - 📁 **Smart file selection** (select all or individual files)
 - ⚡ **Parallel processing** with CPU usage control
 - 🚀 **GPU acceleration** (NVIDIA/AMD auto-detection)
@@ -39,6 +41,7 @@ Contributions and feedback are welcome!
 - ⚙️ **Advanced mode** with custom encoding parameters
 - 🔄 **Back navigation** at every step
 - ⏱️ **Elapsed time tracking**
+- 🛡️ **Graceful exit handling** with file cleanup options
 - 🌐 **Bilingual support** (English/Korean)
 
 ## 📦 Installation
@@ -71,6 +74,22 @@ node bin/index.js
 
 ## 🚀 Usage
 
+### Command Line Arguments
+
+```bash
+# Show help
+npx mtw --help
+
+# Show version
+npx mtw --version
+
+# Convert files in specific folder
+npx mtw /path/to/your/media/files
+
+# Interactive mode (browse folders)
+npx mtw
+```
+
 ### Run with NPX (Recommended)
 
 ```bash
@@ -89,13 +108,33 @@ npm start
 
 ## 💡 Usage Example
 
+### Interactive Folder Browser
+
 ```bash
-$ cd ~/Photos
 $ npx mtw
 
 🎨 Media to Web CLI
 
-? What would you like to convert? 🖼️  Images (jpg/png → webp)
+? How would you like to select the input folder? 📁 Browse folders
+
+📁 Current directory: /
+Found 12 folders
+? Select an option: 📁 Users
+
+📁 Current directory: /Users
+Found 2 folders
+? Select an option: 📁 butfitseoul
+
+📁 Current directory: /Users/butfitseoul
+Found 18 folders
+? Select an option: 📁 Downloads
+
+📁 Current directory: /Users/butfitseoul/Downloads
+Found 6 folders
+? Select an option: ✅ Select this folder
+Selected input folder: /Users/butfitseoul/Downloads
+
+? What would you like to convert? 🎬 Videos (mp4/mov → webm)
 
 ? Select configuration mode: 🔧 Simple Mode - Use presets
 
@@ -222,16 +261,18 @@ media-convert/
 └── README.md
 ```
 
-## 🚧 Future Plans (Premium Version)
+## 🚧 Future Plans
 
-- [ ] Command line options (`--quality`, `--overwrite`)
-- [ ] Real-time progress display
-- [ ] Parallel processing support
+- [x] Command line options (`--help`, `--version`, `--input-path`)
+- [x] Real-time progress display
+- [x] Parallel processing support
+- [x] Interactive folder browser
+- [x] Graceful exit handling
 - [ ] Recursive subfolder scanning (`--recursive`)
-- [ ] Additional format support (AVIF, HEIC, etc.)
+- [ ] Additional format support (HEIC, etc.)
 - [ ] Resizing/cropping features
 - [ ] Metadata preservation options
-- [ ] npm publishing
+- [x] npm publishing setup
 
 ## 📝 License
 

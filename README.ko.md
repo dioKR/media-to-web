@@ -32,6 +32,8 @@
 
 - 🖼️ **이미지 변환**: JPG/PNG → WebP/AVIF
 - 🎬 **동영상 변환**: GPU 가속을 통한 MP4/MOV → WebM
+- 📁 **인터랙티브 폴더 브라우저** (루트 디렉토리부터 탐색)
+- 🎯 **명령줄 인수** (--help, --version, input-path)
 - 📁 **스마트 파일 선택** (전체 선택 또는 개별 선택)
 - ⚡ **병렬 처리** 및 CPU 사용률 제어
 - 🚀 **GPU 가속** (NVIDIA/AMD 자동 감지)
@@ -39,6 +41,7 @@
 - ⚙️ **고급 모드** 사용자 정의 인코딩 매개변수
 - 🔄 **모든 단계에서 뒤로가기**
 - ⏱️ **소요 시간 추적**
+- 🛡️ **우아한 종료 처리** (파일 정리 옵션 포함)
 - 🌐 **다국어 지원** (영어/한국어)
 
 ## 📦 설치
@@ -49,6 +52,22 @@ npm install
 
 ## 🚀 사용법
 
+### 명령줄 인수
+
+```bash
+# 도움말 보기
+npx mtw --help
+
+# 버전 보기
+npx mtw --version
+
+# 특정 폴더의 파일 변환
+npx mtw /path/to/your/media/files
+
+# 인터랙티브 모드 (폴더 탐색)
+npx mtw
+```
+
 ### NPX로 바로 실행 (권장)
 
 ```bash
@@ -56,7 +75,7 @@ npm install
 cd /path/to/your/media/files
 
 # CLI 실행
-npx media-convert-cli
+npx mtw
 ```
 
 ### 로컬에서 실행
@@ -67,24 +86,41 @@ npm start
 
 ## 💡 사용 예시
 
+### 인터랙티브 폴더 브라우저
+
 ```bash
-$ cd ~/Photos
-$ npx media-convert-cli
+$ npx mtw
 
-🎨 미디어 변환 CLI
+🎨 Media to Web CLI
 
-? 무엇을 변환하시겠어요? 🖼️  이미지 (jpg/png → webp)
+? 입력 폴더를 어떻게 선택하시겠어요? 📁 폴더 탐색
 
-? 현재 폴더의 이미지 파일: (스페이스로 선택, Enter로 확인)
-─── 선택 옵션 ───
- ◉ ✓ 모두 선택 / 모두 해제
-─── 파일 목록 ───
- ◉ photo1.jpg (2.5 MB)
- ◉ photo2.png (4.1 MB)
- ◯ screenshot.png (850 KB)
- ◉ vacation.jpeg (1.2 MB)
+📁 현재 디렉토리: /
+찾은 폴더: 12개
+? 옵션을 선택하세요: 📁 Users
+
+📁 현재 디렉토리: /Users
+찾은 폴더: 2개
+? 옵션을 선택하세요: 📁 butfitseoul
+
+📁 현재 디렉토리: /Users/butfitseoul
+찾은 폴더: 18개
+? 옵션을 선택하세요: 📁 Downloads
+
+📁 현재 디렉토리: /Users/butfitseoul/Downloads
+찾은 폴더: 6개
+? 옵션을 선택하세요: ✅ 이 폴더 선택
+선택된 입력 폴더: /Users/butfitseoul/Downloads
+
+? 무엇을 변환하시겠어요? 🎬 동영상 (mp4/mov → webm)
+
+? 설정 모드를 선택하세요: 🔧 간단 모드 - 프리셋 사용
+
+? 파일을 어떻게 선택하시겠어요? ✓ 모든 파일 선택
 
 ? 변환 품질을 선택하세요: 중간 (Medium) - 권장
+
+? CPU 사용률: ⚖️ 균형 - 권장 (코어/2)
 
 ? 변환된 파일을 저장할 폴더: ./converted
 
@@ -157,16 +193,18 @@ media-convert/
 └── README.md
 ```
 
-## 🚧 향후 계획 (유료 버전)
+## 🚧 향후 계획
 
-- [ ] 명령줄 옵션 추가 (`--quality`, `--overwrite`)
-- [ ] 실시간 진행률 표시
-- [ ] 병렬 처리 지원
+- [x] 명령줄 옵션 추가 (`--help`, `--version`, `--input-path`)
+- [x] 실시간 진행률 표시
+- [x] 병렬 처리 지원
+- [x] 인터랙티브 폴더 브라우저
+- [x] 우아한 종료 처리
 - [ ] 하위 폴더 재귀 탐색 (`--recursive`)
-- [ ] AVIF, HEIC 등 추가 포맷 지원
+- [ ] HEIC 등 추가 포맷 지원
 - [ ] 리사이징/크롭 기능
 - [ ] 메타데이터 보존 옵션
-- [ ] npm 배포
+- [x] npm 배포 설정
 
 ## 📝 라이선스
 
