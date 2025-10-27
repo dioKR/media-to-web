@@ -6,7 +6,7 @@ import {
   type GPUInfo,
 } from "./types.js";
 
-// 비디오 품질 프리셋
+// 비디오 품질 프리셋 (이전 설정으로 복원)
 export const VIDEO_QUALITY_PRESETS = {
   [QUALITY_PRESETS.VIDEO.HIGH]: {
     crf: 23,
@@ -25,7 +25,63 @@ export const VIDEO_QUALITY_PRESETS = {
   },
 };
 
-// 고급 비디오 설정 기본값
+// 이전 프리셋들 (고품질, 느림)
+export const VIDEO_QUALITY_PRESETS_LEGACY = {
+  HIGH_QUALITY: {
+    crf: 23,
+    preset: "slow",
+    codec: "libvpx-vp9",
+    description: "최고 품질 (WebM, 느림)",
+  },
+  MEDIUM_QUALITY: {
+    crf: 28,
+    preset: "medium",
+    codec: "libvpx-vp9",
+    description: "중간 품질 (WebM, 중간 속도)",
+  },
+  LOW_QUALITY: {
+    crf: 35,
+    preset: "fast",
+    codec: "libvpx-vp9",
+    description: "낮은 품질 (WebM, 빠름)",
+  },
+};
+
+// 추가 최적화 프리셋들
+export const VIDEO_QUALITY_PRESETS_EXTENDED = {
+  ULTRA_FAST: {
+    crf: 35,
+    preset: "ultrafast",
+    codec: "libx264",
+    description: "최고 속도 (품질 낮음)",
+  },
+  BALANCED: {
+    crf: 26,
+    preset: "fast",
+    codec: "libx264",
+    description: "균형 (속도 + 품질)",
+  },
+  HIGH_QUALITY_H264: {
+    crf: 22,
+    preset: "slow",
+    codec: "libx264",
+    description: "고품질 H.264 (느림)",
+  },
+  WEB_OPTIMIZED: {
+    crf: 28,
+    preset: "fast",
+    codec: "libx264",
+    description: "웹 최적화 (MP4, 빠름)",
+  },
+  ARCHIVE: {
+    crf: 18,
+    preset: "veryslow",
+    codec: "libx265",
+    description: "아카이브용 (최고 압축, 매우 느림)",
+  },
+};
+
+// 고급 비디오 설정 기본값 (이전 설정으로 복원)
 export const DEFAULT_ADVANCED_VIDEO_CONFIG = {
   crf: 28,
   preset: "medium",

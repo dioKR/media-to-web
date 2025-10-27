@@ -67,19 +67,35 @@ export function getVideoEncoder(
       ],
     };
   } else {
-    // CPU 사용 (기본)
-    return {
-      codec: "libvpx-vp9",
-      options: [
-        "-c:v libvpx-vp9",
-        `-crf ${qualitySettings.crf}`,
-        `-preset ${qualitySettings.preset}`,
-        "-c:a libopus",
-        "-b:a 128k",
-        "-row-mt 1",
-        "-threads 0",
-      ],
-    };
+    // CPU 사용 (format에 따라 코덱 선택)
+    if (qualitySettings.format === "webm") {
+      return {
+        codec: "libvpx-vp9",
+        options: [
+          "-c:v libvpx-vp9",
+          `-crf ${qualitySettings.crf}`,
+          `-preset ${qualitySettings.preset}`,
+          "-c:a libopus",
+          "-b:a 128k",
+          "-row-mt 1",
+          "-threads 0",
+        ],
+      };
+    } else {
+      // MP4 포맷
+      return {
+        codec: "libx264",
+        options: [
+          "-c:v libx264",
+          `-crf ${qualitySettings.crf}`,
+          `-preset ${qualitySettings.preset}`,
+          "-c:a aac",
+          "-b:a 128k",
+          "-threads 0",
+          "-movflags +faststart",
+        ],
+      };
+    }
   }
 }
 
@@ -98,11 +114,22 @@ export async function convertVideos(
   if (selectedFiles && selectedFiles.length > 0) {
     videoFiles = selectedFiles;
   } else {
+    console.log(`Looking for video files in: ${inputFolder}`);
     const files = fs.readdirSync(inputFolder);
+    console.log(`Found ${files.length} files in directory`);
+    console.log(
+      `Files: ${files.slice(0, 10).join(", ")}${files.length > 10 ? "..." : ""}`
+    );
+
     videoFiles = files.filter((file) => {
       const ext = path.extname(file).toLowerCase();
-      return SUPPORTED_VIDEO_EXTENSIONS.includes(ext);
+      const isVideo = SUPPORTED_VIDEO_EXTENSIONS.includes(ext);
+      if (isVideo) {
+        console.log(`Found video file: ${file}`);
+      }
+      return isVideo;
     });
+    console.log(`Found ${videoFiles.length} video files`);
   }
 
   if (videoFiles.length === 0) {
@@ -121,7 +148,10 @@ export async function convertVideos(
   // 개별 파일 변환 함수
   const convertSingleVideoFile = async (file: string, index: number) => {
     const inputPath = path.join(inputFolder, file);
-    const outputFileName = path.basename(file, path.extname(file)) + ".webm";
+    const outputExtension =
+      qualitySettings.format === "webm" ? ".webm" : ".mp4";
+    const outputFileName =
+      path.basename(file, path.extname(file)) + outputExtension;
     const outputPath = path.join(outputFolder, outputFileName);
 
     // 진행률 콜백 호출
@@ -267,16 +297,28 @@ function convertSingleVideo(
   encoderOptions: string[] | null = null
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    // GPU 인코더 옵션이 있으면 사용, 없으면 기본 VP9 사용
-    const options = encoderOptions || [
-      "-c:v libvpx-vp9",
-      `-crf ${qualitySettings.crf}`,
-      `-preset ${qualitySettings.preset}`,
-      "-c:a libopus",
-      "-b:a 128k",
-      "-row-mt 1",
-      "-threads 0",
-    ];
+    // GPU 인코더 옵션이 있으면 사용, 없으면 format에 따라 적절한 코덱 사용
+    const options =
+      encoderOptions ||
+      (qualitySettings.format === "webm"
+        ? [
+            "-c:v libvpx-vp9",
+            `-crf ${qualitySettings.crf}`,
+            `-preset ${qualitySettings.preset}`,
+            "-c:a libopus",
+            "-b:a 128k",
+            "-row-mt 1",
+            "-threads 0",
+          ]
+        : [
+            "-c:v libx264",
+            `-crf ${qualitySettings.crf}`,
+            `-preset ${qualitySettings.preset}`,
+            "-c:a aac",
+            "-b:a 128k",
+            "-threads 0",
+            "-movflags +faststart",
+          ]);
 
     ffmpeg(inputPath)
       .outputOptions(options)
