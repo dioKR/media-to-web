@@ -22,7 +22,7 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 1",
     "changelog:all": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
   "keywords": [

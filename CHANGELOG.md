@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
 
+## [0.0.3](https://github.com/dioKR/media-to-web/compare/v0.0.2...v0.0.3) (2025-10-27)
+
+### Features
+
+- implement object-oriented converter architecture ([d96a511](https://github.com/dioKR/media-to-web/commit/d96a5117ca564ed80ad805a7ee473c4abfd0a431))
+
 ## [0.0.2](https://github.com/dioKR/media-to-web/compare/54c5fc1a6c91a0143358e566f1a5b14f6b96ce30...v0.0.2) (2025-10-27)
 
 ### Bug Fixes
