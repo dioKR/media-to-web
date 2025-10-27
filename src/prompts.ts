@@ -11,13 +11,19 @@ import {
   type ConcurrencyLevel,
 } from "./config/types.js";
 import { createImageConfig } from "./config/imageConfig.js";
-import { createVideoConfig } from "./config/videoConfig.js";
+import {
+  createVideoConfig,
+  VIDEO_QUALITY_PRESETS_LEGACY,
+  VIDEO_QUALITY_PRESETS_EXTENDED,
+} from "./config/videoConfig.js";
 
 const SUPPORTED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png"];
 const SUPPORTED_VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi", ".mkv"];
 
-export async function promptUser(): Promise<ConversionConfig> {
-  const currentDir = process.cwd();
+export async function promptUser(
+  inputFolder?: string
+): Promise<ConversionConfig> {
+  const currentDir = inputFolder || process.cwd();
 
   // 1. 변환 타입 선택
   let convertType;
@@ -60,7 +66,7 @@ export async function promptUser(): Promise<ConversionConfig> {
 
     if (result.mode === "__back__") {
       // 변환 타입 선택으로 돌아가기
-      return await promptUser();
+      return await promptUser(inputFolder);
     } else {
       mode = result.mode;
       break;
@@ -98,7 +104,7 @@ export async function promptUser(): Promise<ConversionConfig> {
 
     if (result.selectionMode === "__back__") {
       // 변환 타입 선택으로 돌아가기
-      return await promptUser();
+      return await promptUser(inputFolder);
     } else {
       selectionMode = result.selectionMode;
       break;
@@ -146,7 +152,7 @@ export async function promptUser(): Promise<ConversionConfig> {
 
       if (result.files.includes("__back__")) {
         // 파일 선택 방식으로 돌아가기
-        return await promptUser();
+        return await promptUser(inputFolder);
       } else {
         selectedFiles = {
           files: result.files.filter((f: string) => f !== "__back__"),
@@ -181,7 +187,7 @@ export async function promptUser(): Promise<ConversionConfig> {
 
       if (result.quality === "__back__") {
         // 파일 선택으로 돌아가기
-        return await promptUser();
+        return await promptUser(inputFolder);
       } else {
         quality = result.quality;
         break;
@@ -199,7 +205,7 @@ export async function promptUser(): Promise<ConversionConfig> {
     } catch (error: unknown) {
       if (error instanceof Error && error.message === "__back__") {
         // 뒤로가기 신호 - 파일 선택으로 돌아가기
-        return await promptUser();
+        return await promptUser(inputFolder);
       }
       throw error; // 다른 에러는 그대로 전파
     }
@@ -227,7 +233,7 @@ export async function promptUser(): Promise<ConversionConfig> {
 
     if (result.concurrency === "__back__") {
       // 품질 설정으로 돌아가기
-      return await promptUser();
+      return await promptUser(inputFolder);
     } else if (result.concurrency === "custom") {
       // 사용자 정의 동시 처리 수 입력
       const customResult = await inquirer.prompt([
@@ -256,12 +262,15 @@ export async function promptUser(): Promise<ConversionConfig> {
   // 6. 출력 폴더 설정
   let outputFolder;
   while (true) {
+    // 입력 폴더 기준으로 기본 출력 폴더 설정
+    const defaultOutputFolder = path.join(currentDir, "converted");
+
     const result = await inquirer.prompt([
       {
         type: "input",
         name: "outputFolder",
         message: "Output folder for converted files:",
-        default: "./converted",
+        default: defaultOutputFolder,
         validate: (input) => {
           if (input === "__back__") {
             return true; // 뒤로가기는 유효한 입력
@@ -276,14 +285,17 @@ export async function promptUser(): Promise<ConversionConfig> {
 
     if (result.outputFolder === "__back__") {
       // CPU 설정으로 돌아가기
-      return await promptUser();
+      return await promptUser(inputFolder);
     } else {
       outputFolder = result.outputFolder;
       break;
     }
   }
 
-  const resolvedOutputFolder = path.resolve(outputFolder);
+  // 상대경로인 경우 입력 폴더 기준으로 해석
+  const resolvedOutputFolder = path.isAbsolute(outputFolder)
+    ? path.resolve(outputFolder)
+    : path.resolve(currentDir, outputFolder);
 
   // 출력 폴더 생성
   if (!fs.existsSync(resolvedOutputFolder)) {
@@ -364,6 +376,76 @@ async function promptAdvancedImageConfig(): Promise<ImageConfig> {
 
 // 고급 비디오 설정 프롬프트
 async function promptAdvancedVideoConfig(): Promise<VideoConfig> {
+  // 프리셋 선택 또는 수동 설정
+  const presetChoice = await inquirer.prompt([
+    {
+      type: "list",
+      name: "presetType",
+      message: "Choose configuration method:",
+      choices: [
+        { name: "🎯 Use preset (recommended)", value: "preset" },
+        { name: "⚙️  Manual configuration", value: "manual" },
+      ],
+    },
+  ]);
+
+  if (presetChoice.presetType === "preset") {
+    // 프리셋 선택
+    const presetOptions = [
+      { name: "🚀 Ultra Fast (최고 속도)", value: "ULTRA_FAST" },
+      { name: "⚖️  Balanced (균형)", value: "BALANCED" },
+      { name: "🎬 High Quality H.264 (고품질)", value: "HIGH_QUALITY_H264" },
+      { name: "🌐 Web Optimized (웹 최적화)", value: "WEB_OPTIMIZED" },
+      { name: "📦 Archive (아카이브용)", value: "ARCHIVE" },
+      new inquirer.Separator(),
+      { name: "🔙 Legacy WebM Presets", value: "legacy" },
+    ];
+
+    const selectedPreset = await inquirer.prompt([
+      {
+        type: "list",
+        name: "preset",
+        message: "Select video preset:",
+        choices: presetOptions,
+      },
+    ]);
+
+    if (selectedPreset.preset === "legacy") {
+      // 레거시 WebM 프리셋
+      const legacyPresets = [
+        { name: "🏆 High Quality WebM (최고 품질)", value: "HIGH_QUALITY" },
+        {
+          name: "⚖️  Medium Quality WebM (중간 품질)",
+          value: "MEDIUM_QUALITY",
+        },
+        { name: "⚡ Low Quality WebM (빠름)", value: "LOW_QUALITY" },
+      ];
+
+      const legacyChoice = await inquirer.prompt([
+        {
+          type: "list",
+          name: "legacyPreset",
+          message: "Select legacy WebM preset:",
+          choices: legacyPresets,
+        },
+      ]);
+
+      const preset =
+        VIDEO_QUALITY_PRESETS_LEGACY[
+          legacyChoice.legacyPreset as keyof typeof VIDEO_QUALITY_PRESETS_LEGACY
+        ];
+      return createVideoConfig(preset.crf, preset.preset, preset.codec);
+    } else {
+      // 확장 프리셋
+      const preset =
+        VIDEO_QUALITY_PRESETS_EXTENDED[
+          selectedPreset.preset as keyof typeof VIDEO_QUALITY_PRESETS_EXTENDED
+        ];
+      return createVideoConfig(preset.crf, preset.preset, preset.codec);
+    }
+  }
+
+  // 수동 설정
   let crf;
   while (true) {
     const result = await inquirer.prompt([
