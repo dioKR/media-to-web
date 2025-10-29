@@ -1,6 +1,15 @@
 ## [0.0.5](https://github.com/dioKR/media-to-web/compare/v0.0.4...v0.0.5) (2025-10-29)
 
 
+### Features
+
+* change bin name from mtw to mtw-cli to avoid package name conflict ([9bf9dd3](https://github.com/dioKR/media-to-web/commit/9bf9dd3c234de9040ae89bdc1e429ad4454398df))
+
+
+
+## [0.0.5](https://github.com/dioKR/media-to-web/compare/v0.0.4...v0.0.5) (2025-10-29)
+
+
 
 ## [0.0.4](https://github.com/dioKR/media-to-web/compare/v0.0.3...v0.0.4) (2025-10-29)
 
