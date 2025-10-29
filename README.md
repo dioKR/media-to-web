@@ -53,7 +53,7 @@ Contributions and feedback are welcome!
 npm install -g media-to-web
 
 # Use the CLI
-npx mtw
+npx mtw-cli
 ```
 
 ### From Source
@@ -78,16 +78,16 @@ node bin/index.js
 
 ```bash
 # Show help
-npx mtw --help
+npx mtw-cli --help
 
 # Show version
-npx mtw --version
+npx mtw-cli --version
 
 # Convert files in specific folder
-npx mtw /path/to/your/media/files
+npx mtw-cli /path/to/your/media/files
 
 # Interactive mode (browse folders)
-npx mtw
+npx mtw-cli
 ```
 
 ### Run with NPX (Recommended)
@@ -97,7 +97,7 @@ npx mtw
 cd /path/to/your/media/files
 
 # Run CLI
-npx mtw
+npx mtw-cli
 ```
 
 ### Run locally
@@ -111,7 +111,7 @@ npm start
 ### Interactive Folder Browser
 
 ```bash
-$ npx mtw
+$ npx mtw-cli
 
 🎨 Media to Web CLI
 

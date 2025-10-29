@@ -1,10 +1,10 @@
 {
   "name": "media-to-web",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "🎨 CLI tool to convert images and videos to web-optimized formats (WebP, WebM) - Under Development",
   "main": "dist/bin/index.js",
   "bin": {
-    "mtw": "./dist/bin/index.js",
+    "mtw-cli": "./dist/bin/index.js",
     "media-to-web": "./dist/bin/index.js"
   },
   "files": [

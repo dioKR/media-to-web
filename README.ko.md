@@ -56,16 +56,16 @@ npm install
 
 ```bash
 # 도움말 보기
-npx mtw --help
+npx mtw-cli --help
 
 # 버전 보기
-npx mtw --version
+npx mtw-cli --version
 
 # 특정 폴더의 파일 변환
-npx mtw /path/to/your/media/files
+npx mtw-cli /path/to/your/media/files
 
 # 인터랙티브 모드 (폴더 탐색)
-npx mtw
+npx mtw-cli
 ```
 
 ### NPX로 바로 실행 (권장)
@@ -75,7 +75,7 @@ npx mtw
 cd /path/to/your/media/files
 
 # CLI 실행
-npx mtw
+npx mtw-cli
 ```
 
 ### 로컬에서 실행
@@ -89,7 +89,7 @@ npm start
 ### 인터랙티브 폴더 브라우저
 
 ```bash
-$ npx mtw
+$ npx mtw-cli
 
 🎨 Media to Web CLI
 
