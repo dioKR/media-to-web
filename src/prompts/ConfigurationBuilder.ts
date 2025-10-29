@@ -8,6 +8,7 @@ import {
   createVideoConfig,
   VIDEO_QUALITY_PRESETS,
 } from "../config/videoConfig.js";
+import { cpus } from "os";
 
 interface ConfigurationData {
   convertType: "image" | "video";
@@ -138,8 +139,7 @@ export class ConfigurationBuilder {
       return concurrency;
     }
 
-    const os = require("os");
-    const numCpus = os.cpus().length;
+    const numCpus = cpus().length;
 
     switch (concurrency) {
       case "maximum":
