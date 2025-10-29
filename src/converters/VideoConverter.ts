@@ -2,6 +2,7 @@ import ffmpeg from "fluent-ffmpeg";
 import ffmpegStatic from "ffmpeg-static";
 import fs from "fs";
 import path from "path";
+import { execSync } from "child_process";
 import type {
   VideoConfig,
   ProgressInfo,
@@ -26,13 +27,11 @@ export class VideoConverter extends BaseConverter {
   public detectGPU(): GPUInfo {
     try {
       // NVIDIA GPU 확인
-      const { execSync } = require("child_process");
       execSync("nvidia-smi", { stdio: "ignore" });
       return { available: true, type: "nvidia" };
     } catch {
       try {
         // AMD GPU 확인 (선택적)
-        const { execSync } = require("child_process");
         execSync("rocm-smi", { stdio: "ignore" });
         return { available: true, type: "amd" };
       } catch {
