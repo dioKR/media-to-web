@@ -5,7 +5,10 @@ import { ImageConverter } from "../../src/converters/ImageConverter.js";
 import { VideoConverter } from "../../src/converters/VideoConverter.js";
 import { detectGPU, getVideoEncoder } from "../../src/utils/gpuUtils.js";
 import { createImageConfig } from "../../src/config/imageConfig.js";
-import { createVideoConfig } from "../../src/config/videoConfig.js";
+import {
+  createVideoConfig,
+  VIDEO_QUALITY_PRESETS,
+} from "../../src/config/videoConfig.js";
 import { ImageConfig, VideoConfig } from "../../src/config/types.js";
 
 // 테스트 설정
@@ -535,5 +538,50 @@ describe("Media Conversion E2E Tests", () => {
 
     // Note: Mixed absolute/relative path test removed due to complexity
     // The core functionality works as verified by other tests
+  });
+
+  describe("Quick Mode (defaults)", () => {
+    test("should convert all images in folder with quick defaults", async () => {
+      // Quick 이미지 기본값: format webp, quality high, concurrency balanced
+      const imageConfig = createImageConfig(80, "webp");
+      const concurrency = 1; // deterministic for test environment
+
+      const results = await imageConverter.convert(
+        TEST_FIXTURES_DIR,
+        TEST_OUTPUT_DIR,
+        imageConfig,
+        null, // quick: 전체 파일 자동 선택
+        null,
+        concurrency
+      );
+
+      expect(results.success.length + results.failed.length).toBeGreaterThan(0);
+      expect(results.success.length).toBeGreaterThan(0);
+    });
+
+    test("should convert all videos in folder with quick defaults", async () => {
+      // Quick 비디오 기본값: format webm, quality high(vp9 slow/crf 23), concurrency balanced
+      const preset = VIDEO_QUALITY_PRESETS.high;
+      const videoConfig = createVideoConfig(
+        preset.crf,
+        preset.preset,
+        preset.codec,
+        { format: "webm" }
+      );
+      const concurrency = 1; // deterministic for test environment
+
+      const results = await videoConverter.convert(
+        TEST_FIXTURES_DIR,
+        TEST_OUTPUT_DIR,
+        videoConfig,
+        null, // quick: 전체 파일 자동 선택
+        null,
+        concurrency
+      );
+
+      expect(results.success.length + results.failed.length).toBeGreaterThan(0);
+      // 폴더에 테스트 비디오 1개 이상 존재
+      expect(results.success.length).toBeGreaterThan(0);
+    });
   });
 });
