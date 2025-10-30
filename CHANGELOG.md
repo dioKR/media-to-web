@@ -1,3 +1,12 @@
+## [0.0.6](https://github.com/dioKR/media-to-web/compare/v0.0.5...v0.0.6) (2025-10-30)
+
+
+### Features
+
+* **cli:** add Quick mode (interactive and CLI)\n\n- Mode selection includes Quick (default)\n- PromptManager returns immediate config for Quick\n- CLI flags: --quick, --type, --input, --output, --quality, --format, --concurrency, --select\n- Defaults: high quality, balanced CPU, output ./converted ([7ce32b6](https://github.com/dioKR/media-to-web/commit/7ce32b6e19ab92c6e214b5d5c5be4a7a5f1d9ce7))
+
+
+
 ## [0.0.5](https://github.com/dioKR/media-to-web/compare/v0.0.4...v0.0.5) (2025-10-29)
 
 
