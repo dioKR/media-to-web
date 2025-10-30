@@ -35,6 +35,34 @@ export class PromptManager {
     // 2. 모드 선택 (Simple/Advanced)
     const mode = await this.modePrompt.prompt(inputFolder);
 
+    // Quick 모드: 기본값으로 즉시 실행 구성 반환
+    if (mode === "quick") {
+      const path = await import("path");
+      const { getFiles, ensureDirectory } = await import(
+        "../utils/fileUtils.js"
+      );
+      const outputFolder = path.join(currentDir, "converted");
+      ensureDirectory(outputFolder);
+
+      const selectedFiles = getFiles(
+        currentDir,
+        convertType === "image"
+          ? [".jpg", ".jpeg", ".png"]
+          : [".mp4", ".mov", ".avi", ".mkv"]
+      );
+
+      return this.configBuilder.build({
+        convertType,
+        inputFolder: currentDir,
+        selectedFiles,
+        outputFolder,
+        quality: "high",
+        mode: "simple", // 내부 로직 호환을 위해 표준화
+        advancedConfig: undefined,
+        concurrency: "balanced",
+      });
+    }
+
     // 3. 파일 선택
     const selectedFilesResult = await this.fileSelectionPrompt.prompt(
       currentDir,

@@ -7,6 +7,7 @@ import { resolve, join, basename, extname } from "path";
 import { PromptManager } from "../src/prompts/PromptManager.js";
 import { ConverterFactory } from "../src/converters/ConverterFactory.js";
 import { detectGPU, getVideoEncoder } from "../src/utils/gpuUtils.js";
+import { getFiles, ensureDirectory } from "../src/utils/fileUtils.js";
 import {
   getQualitySettings,
   getConcurrencyLevel,
@@ -14,12 +15,24 @@ import {
 import type { ImageConfig, VideoConfig } from "../src/config/types.js";
 
 // 명령행 인자 파싱
-function parseArgs(): { inputPath?: string; help: boolean; version: boolean } {
+function parseArgs(): {
+  inputPath?: string;
+  help: boolean;
+  version: boolean;
+  quick: boolean;
+  type?: "image" | "video";
+  output?: string;
+  quality?: "high" | "medium" | "low";
+  format?: string;
+  concurrency?: number | "maximum" | "balanced" | "light";
+  select?: "all" | string;
+} {
   const args = process.argv.slice(2);
   const result = {
     inputPath: undefined as string | undefined,
     help: false,
     version: false,
+    quick: false,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -29,6 +42,29 @@ function parseArgs(): { inputPath?: string; help: boolean; version: boolean } {
       result.help = true;
     } else if (arg === "--version" || arg === "-v") {
       result.version = true;
+    } else if (arg === "--quick") {
+      (result as any).quick = true;
+    } else if (arg === "--type") {
+      const val = args[++i];
+      if (val === "image" || val === "video") (result as any).type = val;
+    } else if (arg === "--output") {
+      (result as any).output = resolve(args[++i]);
+    } else if (arg === "--quality") {
+      const val = args[++i] as any;
+      if (["high", "medium", "low"].includes(val))
+        (result as any).quality = val;
+    } else if (arg === "--format") {
+      (result as any).format = args[++i];
+    } else if (arg === "--concurrency") {
+      const val = args[++i];
+      if (["maximum", "balanced", "light"].includes(val)) {
+        (result as any).concurrency = val as any;
+      } else {
+        const n = parseInt(val);
+        if (!Number.isNaN(n) && n > 0) (result as any).concurrency = n;
+      }
+    } else if (arg === "--select") {
+      (result as any).select = args[++i];
     } else if (!arg.startsWith("-") && !result.inputPath) {
       result.inputPath = resolve(arg);
     }
@@ -185,9 +221,54 @@ async function main(): Promise<void> {
       console.log(chalk.gray(`Selected input folder: ${inputFolder}\n`));
     }
 
-    // 새로운 PromptManager 사용
-    const promptManager = new PromptManager();
-    const config = await promptManager.promptUser(inputFolder);
+    // Quick CLI 모드 처리: 플래그로 즉시 실행
+    let config: any;
+    if ((args as any).quick) {
+      const convertType = ((args as any).type as "image" | "video") || "image";
+      const output = (args as any).output || join(inputFolder, "converted");
+      ensureDirectory(output);
+
+      // 파일 선택
+      let selectedFiles: string[] | null = null;
+      if ((args as any).select && (args as any).select !== "all") {
+        // 간단한 패턴 처리: 확장자 필터
+        const pattern = (args as any).select as string;
+        const ext = extname(pattern).toLowerCase();
+        const exts =
+          convertType === "image"
+            ? [".jpg", ".jpeg", ".png"]
+            : [".mp4", ".mov", ".avi", ".mkv"];
+        selectedFiles = getFiles(inputFolder, exts).filter((f) =>
+          ext ? extname(f).toLowerCase() === ext : true
+        );
+      } else {
+        const exts =
+          convertType === "image"
+            ? [".jpg", ".jpeg", ".png"]
+            : [".mp4", ".mov", ".avi", ".mkv"];
+        selectedFiles = getFiles(inputFolder, exts);
+      }
+
+      const mode = "quick";
+      const quality = (args as any).quality || "high";
+      const advancedConfig = undefined;
+      const concurrency = (args as any).concurrency || "balanced";
+
+      config = {
+        convertType,
+        inputFolder,
+        selectedFiles,
+        outputFolder: output,
+        quality,
+        mode,
+        advancedConfig,
+        concurrency,
+      };
+    } else {
+      // 기존 대화식 흐름
+      const promptManager = new PromptManager();
+      config = await promptManager.promptUser(inputFolder);
+    }
 
     // 출력 폴더 저장 (정리용)
     outputFolder = config.outputFolder;

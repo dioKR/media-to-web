@@ -2,7 +2,9 @@ export class ModePrompt {
   /**
    * 모드를 선택합니다.
    */
-  public async prompt(inputFolder?: string): Promise<"simple" | "advanced"> {
+  public async prompt(
+    inputFolder?: string
+  ): Promise<"quick" | "simple" | "advanced"> {
     const inquirer = await import("inquirer");
 
     while (true) {
@@ -12,12 +14,16 @@ export class ModePrompt {
           name: "mode",
           message: "Select configuration mode:",
           choices: [
+            {
+              name: "⚡ Quick Mode - Run immediately with defaults",
+              value: "quick",
+            },
             { name: "🔧 Simple Mode - Use presets", value: "simple" },
             { name: "⚙️  Advanced Mode - Custom settings", value: "advanced" },
             new inquirer.default.Separator(),
             { name: "← Back to file type selection", value: "__back__" },
           ],
-          default: "simple",
+          default: "quick",
         },
       ]);
 
