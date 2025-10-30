@@ -66,6 +66,16 @@ npx mtw-cli /path/to/your/media/files
 
 # 인터랙티브 모드 (폴더 탐색)
 npx mtw-cli
+
+# Quick 모드 (즉시 실행)
+# 이미지: 입력/출력/품질/CPU/선택 모두 한 번에 지정 가능
+npx media-to-web --quick --type image \
+  --input ./images --output ./converted \
+  --quality high --concurrency balanced --select all
+
+# 비디오: 형식/품질 지정, 누락 시 기본값 사용(webm/high/balanced)
+npx media-to-web --quick --type video \
+  --input ./videos --output ./converted --select "*.mp4"
 ```
 
 ### NPX로 바로 실행 (권장)
@@ -80,9 +90,34 @@ npx mtw-cli
 
 ### 로컬에서 실행
 
-```bash
+````bash
 npm start
-```
+### 로컬 개발/테스트 (npm link)
+
+```bash
+# 1) 빌드
+npm run build
+
+# 2) 글로벌 심볼릭 링크 생성 (전역에서 실행 테스트)
+npm link
+
+# 3) 다른 폴더에서 실행 테스트
+mtw-cli --help
+mtw-cli --version
+
+# 4) 링크 해제 (전역 링크 제거)
+npm unlink -g media-to-web
+
+# 5) 프로젝트 루트에서도 링크 해제 필요 시
+npm unlink
+````
+
+주의:
+
+- 전역 설치/링크에 권한 문제가 있으면 `sudo npm link`/`sudo npm unlink -g`를 사용하세요.
+- 전역 링크가 남아 있으면 `npx`가 최신 배포본 대신 링크된 코드를 사용할 수 있습니다.
+
+````
 
 ## 💡 사용 예시
 
@@ -143,7 +178,7 @@ $ npx mtw-cli
     1.2 MB → 420 KB (65.0% 감소)
 
 출력 폴더: /Users/username/Photos/converted
-```
+````
 
 ## 🎯 지원 포맷
 

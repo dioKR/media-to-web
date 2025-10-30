@@ -54,6 +54,16 @@ npm install -g media-to-web
 
 # Use the CLI
 npx mtw-cli
+
+# Quick mode (non-interactive)
+# Images: provide all options at once
+npx media-to-web --quick --type image \
+  --input ./images --output ./converted \
+  --quality high --concurrency balanced --select all
+
+# Videos: missing values fall back to defaults (webm/high/balanced)
+npx media-to-web --quick --type video \
+  --input ./videos --output ./converted --select "*.mp4"
 ```
 
 ### From Source
@@ -102,9 +112,35 @@ npx mtw-cli
 
 ### Run locally
 
-```bash
+````bash
 npm start
-```
+
+### Local development/testing (npm link)
+
+```bash
+# 1) Build
+npm run build
+
+# 2) Create a global symlink
+npm link
+
+# 3) Test from another folder
+mtw-cli --help
+mtw-cli --version
+
+# 4) Remove global link
+npm unlink -g media-to-web
+
+# 5) Optionally unlink in project root
+npm unlink
+````
+
+Notes:
+
+- If you hit permission issues, use `sudo npm link` / `sudo npm unlink -g`.
+- If a global link remains, `npx` may prefer the linked code over the published package.
+
+````
 
 ## 💡 Usage Example
 
@@ -168,7 +204,7 @@ Configuration:
 
 Output folder: /Users/username/Photos/converted
 Total elapsed time: 2m 34s
-```
+````
 
 ## 🎯 Supported Formats
 
